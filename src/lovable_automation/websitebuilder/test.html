@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Font Library Test Page</title>
+    <link rel="stylesheet" href="styles/fonts.css">
+    <style>
+        body {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        .font-sample {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .font-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .font-name {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+        .availability-badge {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .not-available {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .available {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .sample-text {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        .weight-100 { font-weight: 100; }
+        .weight-200 { font-weight: 200; }
+        .weight-300 { font-weight: 300; }
+        .weight-400 { font-weight: 400; }
+        .weight-500 { font-weight: 500; }
+        .weight-600 { font-weight: 600; }
+        .weight-700 { font-weight: 700; }
+        .weight-900 { font-weight: 900; }
+    </style>
+</head>
+<body>
+    <h1>Font Library Test Page</h1>
+    
+    <div class="font-sample">
+        <div class="font-header">
+            <h2 class="font-name" style="font-family: 'Satoshi';">Satoshi</h2>
+            <span class="availability-badge not-available">Not available on Google Fonts</span>
+        </div>
+        <div class="sample-text" style="font-family: 'Satoshi';">
+            <div class="weight-300">Light - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-500">Medium - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-700">Bold - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-900">Black - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-header">
+            <h2 class="font-name" style="font-family: 'Ranade';">Ranade</h2>
+            <span class="availability-badge not-available">Not available on Google Fonts</span>
+        </div>
+        <div class="sample-text" style="font-family: 'Ranade';">
+            <div class="weight-300">Light - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-700">Bold - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-header">
+            <h2 class="font-name" style="font-family: 'Switzer';">Switzer</h2>
+            <span class="availability-badge not-available">Not available on Google Fonts</span>
+        </div>
+        <div class="sample-text" style="font-family: 'Switzer';">
+            <div class="weight-300">Light - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-700">Bold - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-header">
+            <h2 class="font-name" style="font-family: 'Work Sans';">Work Sans</h2>
+            <span class="availability-badge available">Available on Google Fonts</span>
+        </div>
+        <div class="sample-text" style="font-family: 'Work Sans';">
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-700">Bold - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-name">Helvetica Now</div>
+        <div class="sample-text" style="font-family: 'Helvetica Now';">
+            <div class="weight-300">Light - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-700">Bold - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-name">Neue Montreal</div>
+        <div class="sample-text" style="font-family: 'Neue Montreal';">
+            <div class="weight-300">Light - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-700">Bold - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-name">Aeonik</div>
+        <div class="sample-text" style="font-family: 'Aeonik';">
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-name">Neue Haas Grotesk Display</div>
+        <div class="sample-text" style="font-family: 'Neue Haas Grotesk Display';">
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-name">Diatype</div>
+        <div class="sample-text" style="font-family: 'Diatype';">
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-name">Roboto</div>
+        <div class="sample-text" style="font-family: 'Roboto';">
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-700">Bold - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-name">Suisse</div>
+        <div class="sample-text" style="font-family: 'Suisse';">
+            <div class="weight-100">Thin - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-300">Light - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-500">Medium - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-600">SemiBold - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-700">Bold - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-900">Black - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+
+    <div class="font-sample">
+        <div class="font-name">Geist</div>
+        <div class="sample-text" style="font-family: 'Geist';">
+            <div class="weight-100">Thin - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-200">ExtraLight - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-300">Light - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-400">Regular - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-500">Medium - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-600">SemiBold - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-700">Bold - The quick brown fox jumps over the lazy dog</div>
+            <div class="weight-900">Black - The quick brown fox jumps over the lazy dog</div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,61 @@
+Timestamp,Industry,Website,Status,Error
+2025-03-30T05:22:34.791Z,retail,https://fleuretica.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.791Z,media production,https://moonstonefilms.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.791Z,automotive,https://brakeperformance.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.791Z,printing,https://imaginationworks.org,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.791Z,medical devices,https://dms-service.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.791Z,"health, wellness & fitness",https://servethegoddess.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.791Z,sporting goods,https://slippnott.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.791Z,law practice,https://adamatlas.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.792Z,"health, wellness & fitness",https://whoopash.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.792Z,hospital & health care,https://abetterwayinhomecare.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.792Z,retail,https://flowerexplosion.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.792Z,wholesale,https://gazoz.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.792Z,consumer services,https://emmalouskitchen.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.792Z,retail,https://giantrobot.com,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"
+2025-03-30T05:22:34.792Z,construction,https://intelectric.net,error,"page.waitForSelector: Timeout 120000ms exceeded.
+Call log:
+[2m  - waiting for locator('.message') to be visible[22m
+"

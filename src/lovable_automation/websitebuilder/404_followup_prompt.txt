@@ -1,0 +1,17 @@
+1. Routing & Navigation
+• Wrap all buttons, nav links, and CTAs in Link components from react-router-dom.
+• Use the asChild prop where needed for compatibility with UI components like buttons.
+2. Page & Subpage Setup
+• Define all top-level pages (/services, /work, /about, /contact, etc.) in the router to prevent 404 errors.
+• Add a custom 404 page styled to match the brand’s visual identity.
+• For dynamic content sections (e.g., Featured Projects, Services, Case Studies):
+    ◦ Generate dynamic subpages based on centralized data files (e.g., projectsData.ts, servicesData.ts, caseStudiesData.ts).
+    ◦ Ensure each subpage includes:
+        ▪ A hero or banner image▪ A featured image within the page layout
+        ▪ All imagery should visually align with the site’s overall design system (color palette, tone, layout rhythm).
+        ▪ Use high-quality, industry-relevant images — fallback to curated placeholders that feel native to the site design if content-specific images are missing.
+3. Anchor Links
+• Ensure all intra-page anchor links (e.g., #team) scroll properly and target valid element IDs.
+4. Mobile Compatibility
+• Test and validate that navigation and all dynamic routes function seamlessly on mobile.
+• Fix any scroll behavior, alignment, or rendering issues that disrupt the user experience.

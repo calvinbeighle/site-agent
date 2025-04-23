@@ -1,0 +1,39 @@
+
+Please implement comprehensive, robust, and consistent handling of all images and videos sitewide—including all main pages, subpages, dynamically generated content, and sections such as hero areas, testimonials, team profiles, product pages, case studies, and blog articles—following these detailed guidelines:
+1. Validation & Domain Handling
+• Update imageUtils.ts to explicitly allow trusted external image/video domains, including (but not limited to):
+    ◦ Professional image sources: Unsplash, Pexels, Google Maps, Cloudinary, Clearbit, Wikimedia Commons, Contentful, Wikipedia, and relevant CDNs.
+    ◦ Professional video sources: Vimeo, YouTube (strictly professional, brand-related content—no entertainment or humorous videos).
+• Avoid overly restrictive domain validation to ensure valid media reliably loads.
+• Implement clear and detailed console logging for all media load attempts, including:
+    ◦ Component or page name
+    ◦ Media type (image/video)
+    ◦ Exact source URL
+    ◦ Specific reason for failure (invalid domain, malformed URL, missing file, network errors)
+• During development, add a permissive validation override (e.g., () => true) in imageUtils.ts, along with a clear console warning reminding developers to disable it before production deployment.
+2. Standardized Shared Component Usage
+• Replace every direct <img> tag across the site with the standardized EnhancedImage component, which:
+    ◦ Consistently manages fallbacks, lazy loading, alt text (accessibility), and consistent visual styling.
+    ◦ Explicitly verifies image URLs and gracefully handles invalid or missing images without layout shifts.
+• Implement and consistently use a standardized VideoPreview component for all embedded videos, podcasts, and multimedia content, ensuring it:
+    ◦ Displays consistent play-button overlays.
+    ◦ Gracefully handles unavailable or invalid video URLs.
+    ◦ Maintains consistent design alignment and accessibility.
+3. Professional and Contextually Relevant Fallback Logic
+• General images:
+    ◦ When images fail to load, automatically provide professionally-styled fallback images that are contextually relevant to their original content:
+        ▪ Team portraits (e.g., staff or leadership images)
+        ▪ Industry-specific visuals (medical imagery, automotive products, mechanical equipment, client logos)
+    ◦ Explicitly handle previously missed or overlooked images (such as team member portraits or sector-specific visuals) to avoid subsequent corrections.
+• Logo images specifically:
+    ◦ On load failure, provide a professional, text-based fallback clearly displaying the brand or company name in uppercase or title case.
+    ◦ Follow professional logo-design standards with clean serif or sans-serif fonts, consistent alignment, appropriate sizing, and neutral backgrounds if needed.
+• Explicitly disallow:
+    ◦ Humorous, meme-based, entertainment, culturally-specific, or irrelevant fallback images or videos.
+    ◦ Non-professional or inappropriate content (such as music videos, viral videos, Rickrolling, or unrelated media).
+4. Type Safety & Error Prevention
+• Ensure strict and correct usage of React Router’s Link components and props (to, component={Link}), ensuring these props are never incorrectly applied to native HTML elements (<a> tags) to prevent TypeScript errors (TS2322).
+• Avoid incorrect string type comparisons that cause TypeScript type conflicts (e.g., "image" | "auto" vs "text") to prevent TypeScript errors (TS2367).
+Overall Goal:
+Ensure all site images and videos load reliably, gracefully handle failures with professional, contextually appropriate fallbacks, strictly maintain visual consistency and accessibility standards, provide clear and detailed developer logging for troubleshooting, and completely avoid type errors or misuse of components. Explicitly prevent unintended or unprofessional fallback content to maintain brand integrity and professionalism.
+

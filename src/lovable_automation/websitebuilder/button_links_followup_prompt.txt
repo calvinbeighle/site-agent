@@ -1,0 +1,11 @@
+Please audit and fix all page navigation across the site. Specifically:
+I. Button and Link Routing
+• Ensure all buttons that navigate between pages use react-router-dom’s Link component with the asChild prop where appropriate (e.g., in combination with Button or other UI wrappers).
+• Buttons like “Explore Our Services,” “Book a Consultation,” “Our Services,” and “Meet Our Team” must route correctly using internal navigation (not full page reloads).
+II. Anchor Links
+• For internal section anchors (e.g., #team), ensure anchor IDs exist on the target elements and that scrolling behaves correctly across screen sizes.
+III. Broken or Missing Routes
+• Identify and fix any broken or missing routes in the site’s router configuration.
+• Ensure fallback behavior (e.g., 404 page or redirect) is consistent and styled.
+IV. Cross-Page Consistency
+• Double-check that buttons and links in shared components (e.g., footer, navbar) match the updated routes and use the same navigation mechanism as the rest of the app.
