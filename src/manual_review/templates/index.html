@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Website Review Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .website-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 20px;
+        }
+        .website-content {
+            flex: 1;
+            position: relative;
+        }
+        .website-url {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .website-url a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .website-url a:hover {
+            text-decoration: underline;
+        }
+        .website-frame, .website-screenshot {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+        .website-screenshot {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+        }
+        .approve-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .approve-button:hover {
+            background-color: #45a049;
+        }
+        .reject-button {
+            background-color: #f44336;
+            color: white;
+        }
+        .reject-button:hover {
+            background-color: #da190b;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loading::after {
+            content: "Loading...";
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: "Loading."; }
+            40% { content: "Loading.."; }
+            60% { content: "Loading..."; }
+            80% { content: "Loading...."; }
+            100% { content: "Loading....."; }
+        }
+        .preview-type {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+        }
+        .preview-placeholder {
+            width: 100%;
+            height: 600px;
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            color: #666;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        .open-tab-button {
+            background-color: #007bff;
+            color: white;
+        }
+        .open-tab-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Website Review Interface</h1>
+    {% for website in websites %}
+    <div class="website-container" id="website-{{ loop.index }}">
+        <div class="website-content">
+            <div class="website-url">{{ website.Website }}</div>
+            <div id="preview-{{ website.Website|replace('/', '_')|replace(':', '_')|replace('.', '_') }}" data-url="{{ website.Website }}">
+                <div class="preview-placeholder">Loading preview...</div>
+            </div>
+        </div>
+        <div class="button-container">
+            <button class="button approve-button" onclick="approveWebsite({{ loop.index }})">✓ Approve</button>
+            <button class="button reject-button" onclick="rejectWebsite({{ loop.index }})">✗ Reject</button>
+            <a href="{{ website.Website }}" target="_blank" rel="noopener noreferrer" class="button open-tab-button">↗ Open in new tab</a>
+        </div>
+    </div>
+    {% endfor %}
+    <div class="loading" id="loading"></div>
+
+    <!-- Modal for full-size screenshots -->
+    <div id="screenshot-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <img id="modal-image" style="max-width: 100%; max-height: 90vh;">
+        </div>
+    </div>
+
+    <script>
+        // Update previews as they become available
+        async function updatePreviews() {
+            try {
+                const response = await fetch('/get_preview_status');
+                const previewResults = await response.json();
+                
+                Object.entries(previewResults).forEach(([url, result]) => {
+                    const previewId = `preview-${url.replace(/[/:\.]/g, '_')}`;
+                    const previewContainer = document.getElementById(previewId);
+                    if (previewContainer && !previewContainer.dataset.loaded) {
+                        if (result.can_load_in_iframe) {
+                            // Try iframe first, with fallback to screenshot
+                            const iframeHtml = `
+                                <iframe class="website-frame" 
+                                        src="${result.proxy_url}" 
+                                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-top-navigation"
+                                        referrerpolicy="no-referrer"
+                                        onload="this.style.display='block'"
+                                        onerror="handleIframeError(this)"
+                                        style="display: none;"></iframe>
+                                <div class="preview-type">Live Preview</div>
+                            `;
+                            
+                            // If we have a screenshot, show it while iframe loads
+                            const screenshotHtml = result.screenshot ? `
+                                <img class="website-screenshot" 
+                                     src="data:image/png;base64,${result.screenshot}" 
+                                     alt="Website screenshot" 
+                                     onclick="showFullScreenshot(this.src)"
+                                     id="screenshot-${previewId}">
+                                <div class="preview-type">Screenshot</div>
+                            ` : `<div class="preview-placeholder">Loading preview...</div>`;
+                            
+                            previewContainer.innerHTML = iframeHtml + screenshotHtml;
+                            
+                            // Hide screenshot once iframe loads successfully
+                            const iframe = previewContainer.querySelector('iframe');
+                            iframe.addEventListener('load', () => {
+                                const screenshot = document.getElementById(`screenshot-${previewId}`);
+                                if (screenshot) {
+                                    screenshot.style.display = 'none';
+                                }
+                                const previewType = previewContainer.querySelector('.preview-type');
+                                if (previewType) {
+                                    previewType.textContent = 'Live Preview';
+                                }
+                            });
+                        } else if (result.screenshot) {
+                            previewContainer.innerHTML = `
+                                <img class="website-screenshot" 
+                                     src="data:image/png;base64,${result.screenshot}" 
+                                     alt="Website screenshot" 
+                                     onclick="showFullScreenshot(this.src)">
+                                <div class="preview-type">Screenshot</div>
+                            `;
+                        } else {
+                            previewContainer.innerHTML = `
+                                <div class="preview-placeholder">Failed to load preview</div>
+                            `;
+                        }
+                        previewContainer.dataset.loaded = 'true';
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching preview status:', error);
+            }
+        }
+
+        function handleIframeError(iframe) {
+            const container = iframe.parentElement;
+            const screenshot = container.querySelector('.website-screenshot');
+            if (screenshot) {
+                screenshot.style.display = 'block';
+                iframe.style.display = 'none';
+                const previewType = container.querySelector('.preview-type');
+                if (previewType) {
+                    previewType.textContent = 'Screenshot';
+                }
+            }
+        }
+
+        // Update previews periodically
+        setInterval(updatePreviews, 1000);
+
+        // Modal functions
+        function showFullScreenshot(src) {
+            const modal = document.getElementById('screenshot-modal');
+            const modalImg = document.getElementById('modal-image');
+            modal.style.display = 'flex';
+            modalImg.src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('screenshot-modal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('screenshot-modal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        async function approveWebsite(index) {
+            const website = {{ websites|tojson|safe }}[index - 1];
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                const response = await fetch('/approve_website', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(website),
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById(`website-${index}`).style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error approving website:', error);
+            }
+            
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function rejectWebsite(index) {
+            document.getElementById(`website-${index}`).style.display = 'none';
+        }
+    </script>
+</body>
+</html> 
