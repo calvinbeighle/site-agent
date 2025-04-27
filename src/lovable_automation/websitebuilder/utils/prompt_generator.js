@@ -35,8 +35,8 @@ class PromptGenerator {
 
         // Otherwise generate a prompt using the template
         let prompt = this.template
-            .replace(/\{\{industry_type\}\}/g, record.Industry)
-            .replace(/\{\{current_website_url\}\}/g, record.Website);
+            .replace(/\{\{INDUSTRY\}\}/g, record.Industry)
+            .replace(/\{\{SITE_URL\}\}/g, record.Website);
 
         return prompt;
     }

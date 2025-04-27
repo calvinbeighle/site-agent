@@ -38,8 +38,8 @@ const promptTemplate = readFileSync(templateFile, 'utf-8');
 const enhancedRecords = records.map(record => {
   // Replace variables in the prompt template
   const customPrompt = promptTemplate
-    .replace(/\{\{industry_type\}\}/g, record.Industry)
-    .replace(/\{\{current_website_url\}\}/g, record.Website);
+    .replace(/\{\{INDUSTRY\}\}/g, record.Industry)
+    .replace(/\{\{SITE_URL\}\}/g, record.Website);
   
   // Add the prompt to the record
   return {

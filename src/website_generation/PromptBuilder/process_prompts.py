@@ -7,8 +7,8 @@ def read_prompt_template():
 
 def process_prompt(template, industry, website):
     # Replace variables in the template
-    processed_prompt = template.replace('{{industry_type}}', industry)
-    processed_prompt = processed_prompt.replace('{{current_website_url}}', website)
+    processed_prompt = template.replace('{{INDUSTRY}}', industry)
+    processed_prompt = processed_prompt.replace('{{SITE_URL}}', website)
     # Ensure the prompt is properly escaped for CSV
     return processed_prompt.replace('\n', '\\n')
 

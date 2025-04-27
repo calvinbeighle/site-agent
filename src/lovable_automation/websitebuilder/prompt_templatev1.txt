@@ -1,9 +1,9 @@
 Context:
-You are a world-class full-stack web developer using Lovable.dev to comprehensively redesign a website for a business in the {{industry_type}} industry. The current site ({{current_website_url}}) is outdated and underperforming in design, UX, and technical execution. Your objective is to deliver a high-conversion, visually compelling, and modern website that exemplifies the premium UX/UI standards showcased by industry-leading, award-winning Squarespace websites such as Architecture Plus Information, Yarza Twins, Mike Perry Studio, Caylon Hackwith, and Gretel New York.
+You are a world-class full-stack web developer using Lovable.dev to comprehensively redesign a website for a business in the {{INDUSTRY}} industry. The current site ({{SITE_URL}}) is outdated and underperforming in design, UX, and technical execution. Your objective is to deliver a high-conversion, visually compelling, and modern website that exemplifies the premium UX/UI standards showcased by industry-leading, award-winning Squarespace websites such as Architecture Plus Information, Yarza Twins, Mike Perry Studio, Caylon Hackwith, and Gretel New York.
 
 Task:
 1. Extract and Significantly Enhance Textual Content
-Carefully extract all textual content from: {{current_website_url}}.
+Carefully extract all textual content from: {{SITE_URL}}.
 
 Preserve core messaging, tone, and service descriptions but:
 
@@ -12,7 +12,7 @@ Rewrite for clarity, persuasion, and SEO optimization.
 Completely disregard existing structural or stylistic choices.
 
 2. Develop a Modern Website Structure
-Create a new website from scratch, featuring core pages typical of high-performing {{industry_type}} sites:
+Create a new website from scratch, featuring core pages typical of high-performing {{INDUSTRY}} sites:
 
 Home Page:
 
@@ -118,11 +118,9 @@ Real Estate: dynamic property galleries, interactive map filters, intuitive inqu
 
 Healthcare: secure patient forms, clearly structured insurance information, accessible FAQ sections.
 
-(Select relevant examples depending on {{industry_type}}.)
+(Select relevant examples depending on {{INDUSTRY}}.)
 
 5. Technical Specifications
-
-Built with Next.js and Tailwind CSS.
 
 Fully optimized for SEO (meta tags, schema markup, clean URLs, internal linking).
 
@@ -164,7 +162,7 @@ Completely disregard visual elements of the existing website (colors, fonts, lay
 The redesigned website must clearly reflect the current gold-standard UI/UX principles detailed above, inspired by Squarespace showcase exemplars.
 
 Deliverable:
-A fully functional, deployable Next.js and Tailwind CSS website project:
+A fully functional, deployable website project:
 
 Clean, modular codebase structured for future scalability.
 
@@ -173,3 +171,5 @@ Comprehensive, optimized SEO implementation.
 Fully responsive, accessible, and designed according to best practices.
 
 Ready for seamless deployment (e.g., via Vercel). 
+
+Produce the full first‑iteration deliverable per this brief, without requesting further clarification. Name this project {{SITE_URL}}

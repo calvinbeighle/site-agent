@@ -157,8 +157,8 @@ async function main() {
 
             // Replace variables in the prompt template
             const prompt = promptTemplate
-                .replace('{{industry_type}}', row.Industry)
-                .replace('{{current_website_url}}', row.Website);
+                .replace('{{INDUSTRY}}', row.Industry)
+                .replace('{{SITE_URL}}', row.Website);
 
             try {
                 console.log('Navigating to Lovable.dev in new tab...');

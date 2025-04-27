@@ -22,7 +22,7 @@ npx playwright install chromium
 
 3. Ensure you have the following files in the project directory:
 - `PremiumOutreach3.28.csv` - Your input CSV file with `Industry` and `Website` columns
-- `prompt_template.txt` - The prompt template with `{{industry_type}}` and `{{current_website_url}}` placeholders
+- `prompt_template.txt` - The prompt template with `{{INDUSTRY}}` and `{{SITE_URL}}` placeholders
 
 ## Usage
 

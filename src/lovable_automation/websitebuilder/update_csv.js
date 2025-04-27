@@ -18,8 +18,8 @@ const promptTemplate = readFileSync(templateFile, 'utf-8');
 const enhancedRecords = records.map(record => {
   // Replace variables in the prompt template
   const customPrompt = promptTemplate
-    .replace(/\{\{industry_type\}\}/g, record.industry)
-    .replace(/\{\{current_website_url\}\}/g, record.website);
+    .replace(/\{\{INDUSTRY\}\}/g, record.industry)
+    .replace(/\{\{SITE_URL\}\}/g, record.website);
   
   // Add the prompt to the record
   return {
@@ -56,12 +56,12 @@ stringify(enhancedRecords, { header: true }, (err, output) => {
     const finalMainJs = updatedMainJs.replace(
       `// Replace variables in the prompt template
                 const prompt = promptTemplate
-                    .replace(/\{\{industry_type\}\}/g, row.industry)
-                    .replace(/\{\{current_website_url\}\}/g, row.website);`,
+                    .replace(/\{\{INDUSTRY\}\}/g, row.industry)
+                    .replace(/\{\{SITE_URL\}\}/g, row.website);`,
       `// Use the pre-generated prompt from the CSV
                 const prompt = row.prompt || promptTemplate
-                    .replace(/\{\{industry_type\}\}/g, row.industry)
-                    .replace(/\{\{current_website_url\}\}/g, row.website);`
+                    .replace(/\{\{INDUSTRY\}\}/g, row.industry)
+                    .replace(/\{\{SITE_URL\}\}/g, row.website);`
     );
 
     // Write the updated main.js
