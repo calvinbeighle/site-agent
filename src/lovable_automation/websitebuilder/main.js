@@ -12,6 +12,8 @@ const BatchProcessor = require('./utils/batch_processor');
 const CheckpointManager = require('./utils/checkpoint_manager');
 const LoginHandler = require('./utils/login_handler');
 const PromptGenerator = require('./utils/prompt_generator');
+const GoogleSheetsService = require('./utils/google_sheets_service');
+const { updateProjectPrivacy } = require('./privateandbadge');
 
 const execAsync = promisify(exec);
 
@@ -26,13 +28,17 @@ const CONFIG = {
     userDataDir: join(__dirname, 'browser-data'),
     testMode: false,
     processingDelay: 300000,
-    concurrentTabs: 2,  // Reduced from 8 to 2
+    concurrentTabs: 5,  // Reduced from 8 to 2
     delayBetweenPrompts: 30000,  // Increased to 30 seconds
     checkpointDir: join(__dirname, 'checkpoints'),
     skipWebsites: [],
     batchSize: 5,  // Process 5 companies at a time
     delayBetweenBatches: 30000, // 30 seconds between batches
-    enableLogin: false  // Set login process to OFF
+    enableLogin: false,  // Set login process to OFF
+    enablePrivacySettings: false,  // Flag to enable/disable privacy settings (privateandbadge)
+    waitForAIResponse: true,  // Wait for the AI to respond to the initial prompt
+    enableFollowupPrompts: true,  // Enable sending follow-up prompts
+    enableProjectRename: true  // Enable project renaming functionality
 };
 
 // Initialize managers
@@ -62,8 +68,11 @@ class WebsiteBatchProcessor extends BatchProcessor {
     }
 
     async processItem(item) {
+        // Add debug logging to see what's being processed
+        console.log(`Processing item with id: ${item.id}, Website: ${item.Website}`);
+        
         if (this.checkpointManager.isProcessed(item)) {
-            console.log(`Skipping already processed item: ${item.Website}`);
+            console.log(`Skipping already processed item: ${item.Website} (id: ${item.id})`);
             return { status: 'skipped', error: null };
         }
 
@@ -98,7 +107,10 @@ class WebsiteBatchProcessor extends BatchProcessor {
             this.checkpointManager.markFailed(item);
             return { status: 'error', error: error.message };
         } finally {
-            await page.close();
+            // Only close the page if we're not in KEEP_OPEN mode
+            // For now just leave all pages open so that follow-up prompts can work
+            console.log(`Keeping browser page open for ${item.Website} to allow follow-up prompts`);
+            // Disabled: await page.close();
         }
     }
 
@@ -113,74 +125,123 @@ class WebsiteBatchProcessor extends BatchProcessor {
             // Submit the prompt
             await responseHandler.clickElement('button[type="submit"]');
             
-            // Wait for response
-            const responseReceived = await responseHandler.waitForResponse();
-            if (!responseReceived) {
-                throw new Error('Failed to receive response from AI');
+            // Add the current date to Lovable Site Created Date column
+            const currentDate = new Date();
+            const formattedDate = `${currentDate.getMonth() + 1}/${currentDate.getDate()}/${currentDate.getFullYear()}`;
+            await GoogleSheetsService.updateLovableSiteCreatedDate(item.Website, formattedDate);
+            
+            // Update Site Build Status to "done" in Google Sheet right after sending
+            await GoogleSheetsService.updateSiteBuildStatus(item.Website, "done");
+            
+            // Wait 2 seconds for the URL to properly update to project URL
+            console.log(`Waiting 2 seconds for URL to update to project URL...`);
+            await page.waitForTimeout(2000);
+            
+            // Capture the current URL without validation - just take whatever URL the browser is on
+            const projectUrl = page.url();
+            console.log(`Captured project URL: ${projectUrl}`);
+            
+            // Save the Lovable project URL right after updating the status
+            await GoogleSheetsService.updateLovableProjectUrl(item.Website, projectUrl);
+            
+            // Make the project private and hide the badge (only if enabled)
+            if (CONFIG.enablePrivacySettings) {
+                try {
+                    console.log(`Setting project to private and hiding badge...`);
+                    await updateProjectPrivacy(page);
+                } catch (privacyError) {
+                    console.error(`Error setting project privacy: ${privacyError.message}`);
+                    // Continue with normal flow even if privacy setting fails
+                }
+            } else {
+                console.log(`Privacy settings disabled - skipping privateandbadge steps`);
+            }
+            
+            // Wait for response from AI (if enabled)
+            if (CONFIG.waitForAIResponse) {
+                console.log(`Waiting for AI response...`);
+                const responseReceived = await responseHandler.waitForResponse();
+                if (!responseReceived) {
+                    throw new Error('Failed to receive response from AI');
+                }
+                console.log(`AI response received successfully`);
+            } else {
+                console.log(`Skipping wait for AI response (disabled in config)`);
             }
 
-            // Read follow-up prompt files
-            const followup404Prompt = readFileSync(join(__dirname, '404_followup_prompt.txt'), 'utf-8');
-            const followupImagePrompt = readFileSync(join(__dirname, 'image_followup_prompt.txt'), 'utf-8');
-            const followupButtonLinksPrompt = readFileSync(join(__dirname, 'button_links_followup_prompt.txt'), 'utf-8');
+            // Process follow-up prompts (if enabled)
+            if (CONFIG.enableFollowupPrompts) {
+                // Read follow-up prompt files
+                const followup404Prompt = readFileSync(join(__dirname, '404_followup_prompt.txt'), 'utf-8');
+                const followupImagePrompt = readFileSync(join(__dirname, 'image_followup_prompt.txt'), 'utf-8');
+                const followupButtonLinksPrompt = readFileSync(join(__dirname, 'button_links_followup_prompt.txt'), 'utf-8');
+                
+                // Schedule 404 follow-up prompt (7 minutes after initial submission)
+                setTimeout(async () => {
+                    try {
+                        console.log(`Sending 404 follow-up prompt for ${item['Company Name']}...`);
+                        await responseHandler.fillInput('#chatinput', followup404Prompt);
+                        await responseHandler.clickElement('button[type="submit"]');
+                        console.log(`404 follow-up prompt sent for ${item['Company Name']}`);
+                    } catch (error) {
+                        console.error(`Error sending 404 follow-up prompt for ${item['Company Name']}:`, error);
+                    }
+                }, 7 * 60 * 1000); // 7 minutes
+                
+                // Schedule image follow-up prompt (6 minutes after 404 prompt = 13 minutes after initial)
+                setTimeout(async () => {
+                    try {
+                        console.log(`Sending image follow-up prompt for ${item['Company Name']}...`);
+                        await responseHandler.fillInput('#chatinput', followupImagePrompt);
+                        await responseHandler.clickElement('button[type="submit"]');
+                        console.log(`Image follow-up prompt sent for ${item['Company Name']}`);
+                    } catch (error) {
+                        console.error(`Error sending image follow-up prompt for ${item['Company Name']}:`, error);
+                    }
+                }, 13 * 60 * 1000); // 13 minutes (7 + 6)
+                
+                // Schedule button/links follow-up prompt (4 minutes after image prompt = 17 minutes after initial)
+                setTimeout(async () => {
+                    try {
+                        console.log(`Sending button/links follow-up prompt for ${item['Company Name']}...`);
+                        await responseHandler.fillInput('#chatinput', followupButtonLinksPrompt);
+                        await responseHandler.clickElement('button[type="submit"]');
+                        console.log(`Button/links follow-up prompt sent for ${item['Company Name']}`);
+                    } catch (error) {
+                        console.error(`Error sending button/links follow-up prompt for ${item['Company Name']}:`, error);
+                    }
+                }, 17 * 60 * 1000); // 17 minutes (7 + 6 + 4)
+                
+                console.log(`Follow-up prompts scheduled for ${item['Company Name']}`);
+            } else {
+                console.log(`Follow-up prompts disabled - skipping follow-up scheduling`);
+            }
             
-            // Schedule 404 follow-up prompt (7 minutes after initial submission)
-            setTimeout(async () => {
+            // Rename the project (if enabled)
+            if (CONFIG.enableProjectRename) {
                 try {
-                    console.log(`Sending 404 follow-up prompt for ${item['Company Name']}...`);
-                    await responseHandler.fillInput('#chatinput', followup404Prompt);
-                    await responseHandler.clickElement('button[type="submit"]');
-                    console.log(`404 follow-up prompt sent for ${item['Company Name']}`);
-                } catch (error) {
-                    console.error(`Error sending 404 follow-up prompt for ${item['Company Name']}:`, error);
+                    console.log('Attempting to rename project...');
+                    // Click the project menu button
+                    await responseHandler.clickElement('button[aria-label="Project menu"], button[aria-haspopup="menu"]');
+                    await page.waitForTimeout(1000);
+                    
+                    // Click the Rename option
+                    await responseHandler.clickElement('button:has-text("Rename"), [role="menuitem"]:has-text("Rename")');
+                    
+                    // Fill in the new project name
+                    const projectName = `${item['Company Name']}Website`;
+                    await responseHandler.clickElement('input[type="text"]');
+                    await responseHandler.fillInput('input[type="text"]', projectName);
+                    
+                    // Click Save
+                    await responseHandler.clickElement('button:has-text("Save")');
+                    
+                    console.log('Project renamed successfully');
+                } catch (renameError) {
+                    console.log('Could not rename project:', renameError.message);
                 }
-            }, 7 * 60 * 1000); // 7 minutes
-            
-            // Schedule image follow-up prompt (6 minutes after 404 prompt = 13 minutes after initial)
-            setTimeout(async () => {
-                try {
-                    console.log(`Sending image follow-up prompt for ${item['Company Name']}...`);
-                    await responseHandler.fillInput('#chatinput', followupImagePrompt);
-                    await responseHandler.clickElement('button[type="submit"]');
-                    console.log(`Image follow-up prompt sent for ${item['Company Name']}`);
-                } catch (error) {
-                    console.error(`Error sending image follow-up prompt for ${item['Company Name']}:`, error);
-                }
-            }, 13 * 60 * 1000); // 13 minutes (7 + 6)
-            
-            // Schedule button/links follow-up prompt (4 minutes after image prompt = 17 minutes after initial)
-            setTimeout(async () => {
-                try {
-                    console.log(`Sending button/links follow-up prompt for ${item['Company Name']}...`);
-                    await responseHandler.fillInput('#chatinput', followupButtonLinksPrompt);
-                    await responseHandler.clickElement('button[type="submit"]');
-                    console.log(`Button/links follow-up prompt sent for ${item['Company Name']}`);
-                } catch (error) {
-                    console.error(`Error sending button/links follow-up prompt for ${item['Company Name']}:`, error);
-                }
-            }, 17 * 60 * 1000); // 17 minutes (7 + 6 + 4)
-            
-            // Try to rename the project
-            try {
-                console.log('Attempting to rename project...');
-                // Click the project menu button
-                await responseHandler.clickElement('button[aria-label="Project menu"], button[aria-haspopup="menu"]');
-                await page.waitForTimeout(1000);
-                
-                // Click the Rename option
-                await responseHandler.clickElement('button:has-text("Rename"), [role="menuitem"]:has-text("Rename")');
-                
-                // Fill in the new project name
-                const projectName = `${item['Company Name']}Website`;
-                await responseHandler.clickElement('input[type="text"]');
-                await responseHandler.fillInput('input[type="text"]', projectName);
-                
-                // Click Save
-                await responseHandler.clickElement('button:has-text("Save")');
-                
-                console.log('Project renamed successfully');
-            } catch (renameError) {
-                console.log('Could not rename project:', renameError.message);
+            } else {
+                console.log(`Project renaming disabled - skipping rename steps`);
             }
 
             return { status: 'success', error: null };
@@ -200,28 +261,16 @@ async function readPromptTemplate() {
     }
 }
 
-async function readInputCSV(inputFile) {
+async function readInputSheet() {
     try {
-        console.log('\n=== CSV File Details ===');
-        console.log('Looking for file:', inputFile);
+        console.log('\n=== Google Sheet Input ===');
         
-        if (!existsSync(inputFile)) {
-            throw new Error(`File not found: ${inputFile}`);
-        }
+        // Get records from Google Sheets
+        const records = await GoogleSheetsService.getInputRows();
         
-        const fileContent = readFileSync(inputFile, 'utf-8');
-        const records = parse(fileContent, {
-            columns: true,
-            skip_empty_lines: true,
-            trim: true
-        });
-
-        // Filter out records with empty Website field
-        const validRecords = records.filter(record => record.Website && record.Website.trim() !== '');
-
         // Validate required fields
         const requiredFields = ['Website', 'Company Name', 'Industry'];
-        for (const row of validRecords) {
+        for (const row of records) {
             for (const field of requiredFields) {
                 if (!row[field] || row[field].trim() === '') {
                     console.warn(`Warning: Missing required field '${field}' in row with Website: ${row.Website || 'unknown'}`);
@@ -229,25 +278,23 @@ async function readInputCSV(inputFile) {
             }
         }
 
-        console.log(`✅ Successfully parsed ${validRecords.length} rows from CSV`);
-        return validRecords;
+        console.log(`✅ Successfully read ${records.length} rows from Google Sheet`);
+        return records;
     } catch (error) {
-        console.error('Error reading input CSV:', error);
+        console.error('Error reading from Google Sheet:', error);
         throw error;
     }
 }
 
-async function logResult(timestamp, industry, website, status, error) {
+async function logResultSheet(timestamp, industry, website, status, error) {
     try {
-        await csvWriter.writeRecords([{
-            timestamp,
-            industry,
-            website,
-            status,
-            error: error ? error.toString() : ''
-        }]);
+        // Create a log string similar to what CSV would have
+        const logValue = `${timestamp},${industry || ''},${website || ''},${status || ''},${error ? error.toString() : ''}`;
+        
+        // Update the Google Sheet
+        await GoogleSheetsService.appendAutomationLog(website, logValue);
     } catch (error) {
-        console.error('Error logging result:', error);
+        console.error('Error logging result to Google Sheet:', error);
     }
 }
 
@@ -312,11 +359,9 @@ async function main() {
             console.log('Login is disabled, skipping login process...');
         }
 
-        // Find and read the latest CSV file
-        const inputFile = await findLatestClassificationCSV();
-        console.log('Using latest CSV file:', inputFile);
-        
-        const records = await readInputCSV(inputFile);
+        // Read records from Google Sheet directly
+        console.log('Reading data from Google Sheet...');
+        const records = await readInputSheet();
         console.log(`Found ${records.length} websites to process`);
         
         // Filter out websites that should be skipped
@@ -336,16 +381,31 @@ async function main() {
         
         console.log(`After removing duplicates, ${uniqueRecords.length} websites will be processed`);
         
+        // Set batch size dynamically - if 5 or fewer websites, process all at once
+        const dynamicBatchSize = uniqueRecords.length > 5 ? CONFIG.batchSize : uniqueRecords.length;
+        
         // Important: Use concurrent processing
         const batchProcessor = new WebsiteBatchProcessor({
-            batchSize: CONFIG.batchSize,  // Process 5 companies at a time
+            batchSize: dynamicBatchSize,  // Dynamic batch size
             delayBetweenBatches: CONFIG.delayBetweenBatches, // 30 seconds between batches
-            maxConcurrent: CONFIG.batchSize  // Process all 5 sites concurrently
+            maxConcurrent: dynamicBatchSize  // Process all sites in the batch concurrently
         });
 
         // Add all records to the queue first
         console.log('Adding all websites to processing queue...');
+        
+        // Create a Set to track already queued websites to prevent duplication
+        const queuedWebsites = new Set();
+        
         for (const record of uniqueRecords) {
+            // Skip if already queued
+            if (queuedWebsites.has(record.Website)) {
+                console.log(`Already queued website, skipping duplicate: ${record.Website}`);
+                continue;
+            }
+            
+            // Mark as queued and add to processor
+            queuedWebsites.add(record.Website);
             batchProcessor.addToQueue({
                 id: record.Website,
                 Website: record.Website,
@@ -356,13 +416,13 @@ async function main() {
         }
         
         // Now process the queue in batches
-        console.log(`Processing ${uniqueRecords.length} websites in batches of ${CONFIG.batchSize}...`);
-        console.log(`Processing ${CONFIG.batchSize} websites concurrently with ${CONFIG.delayBetweenBatches}ms delay between batches`);
+        console.log(`Processing ${uniqueRecords.length} websites in batches of ${dynamicBatchSize}...`);
+        console.log(`Processing ${dynamicBatchSize} websites concurrently with ${CONFIG.delayBetweenBatches}ms delay between batches`);
         const results = await batchProcessor.processQueue();
 
         // Log results
         for (const [website, result] of results.entries()) {
-            await logResult(
+            await logResultSheet(
                 new Date().toISOString(),
                 uniqueRecords.find(r => r.Website === website)?.Industry || 'unknown',
                 website,
