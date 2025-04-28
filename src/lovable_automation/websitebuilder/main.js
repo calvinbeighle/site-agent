@@ -144,6 +144,29 @@ class WebsiteBatchProcessor extends BatchProcessor {
             // Save the Lovable project URL right after updating the status
             await GoogleSheetsService.updateLovableProjectUrl(item.Website, projectUrl);
             
+            // Extract and save the Lovable project name
+            try {
+                // Wait for the element containing the project name to be available
+                await responseHandler.waitForElement('p.hidden.truncate.text-sm.font-medium.md\\:block');
+                // Extract the project name text
+                const projectName = await page.evaluate(() => {
+                    const element = document.querySelector('p.hidden.truncate.text-sm.font-medium.md\\:block');
+                    return element ? element.textContent.trim() : '';
+                });
+                console.log(`Extracted project name: ${projectName}`);
+                
+                // Save the Lovable project name to Google Sheets
+                if (projectName) {
+                    await GoogleSheetsService.updateLovableProjectName(item.Website, projectName);
+                    console.log(`Saved project name to Google Sheets: ${projectName}`);
+                } else {
+                    console.log(`Could not find project name in the page`);
+                }
+            } catch (nameError) {
+                console.error(`Error extracting or saving project name: ${nameError.message}`);
+                // Continue with normal flow even if project name extraction fails
+            }
+            
             // Make the project private and hide the badge (only if enabled)
             if (CONFIG.enablePrivacySettings) {
                 try {

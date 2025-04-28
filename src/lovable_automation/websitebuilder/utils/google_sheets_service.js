@@ -316,6 +316,37 @@ class GoogleSheetsService {
       return false;
     }
   }
+
+  /**
+   * Update Lovable Project Name for a specific row
+   * @param {string} website - Website URL to identify the row
+   * @param {string} projectName - Project name to set
+   * @returns {boolean} Success status
+   */
+  async updateLovableProjectName(website, projectName) {
+    try {
+      if (!this.sheets) await this.initialize();
+      const rows = (await this.sheets.spreadsheets.values.get({spreadsheetId: this.SPREADSHEET_ID, range: `${this.SHEET_NAME}!A:A`})).data.values;
+      if (!rows || rows.length === 0) return false;
+      let rowIndex = -1;
+      for (let i = 1; i < rows.length; i++) if (rows[i][0] === website) { rowIndex = i + 1; break; }
+      if (rowIndex === -1) return false;
+      const headers = (await this.sheets.spreadsheets.values.get({spreadsheetId: this.SPREADSHEET_ID, range: `${this.SHEET_NAME}!1:1`})).data.values[0];
+      const nameColIndex = headers.indexOf('Lovable Project Name');
+      if (nameColIndex === -1) return false;
+      await this.sheets.spreadsheets.values.update({
+        spreadsheetId: this.SPREADSHEET_ID,
+        range: `${this.SHEET_NAME}!${String.fromCharCode(65 + nameColIndex)}${rowIndex}`,
+        valueInputOption: 'USER_ENTERED',
+        resource: { values: [[projectName]] }
+      });
+      console.log(`Updated Lovable Project Name for ${website} to ${projectName}`);
+      return true;
+    } catch (error) {
+      console.error(`Error updating Lovable Project Name for ${website}:`, error);
+      return false;
+    }
+  }
 }
 
 module.exports = new GoogleSheetsService(); 
