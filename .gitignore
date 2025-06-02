@@ -1,6 +1,7 @@
 venv/
 legacy/
 backups/
+data/
 .DS_Store
 *.pyc
 __pycache__/
@@ -78,3 +79,87 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Profiling output
+*.prof
+*.prof.*
+
+# Pytest cache
+.pytest_cache/
+
+# MyPy cache
+.mypy_cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# More OS-specific files
+desktop.ini
+
+# Node.js / Yarn / NPM
+node_modules/
+.pnp
+.pnp.js
+# package-lock.json # Uncomment if you don't want to commit this
+# yarn.lock # Uncomment if you don't want to commit this
+
+# Terraform state files
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Serverless framework files
+.serverless/
+
+# Specific build artifacts from other tools
+.parcel-cache/
+
+# Secrets and sensitive configuration files (add any specific to your project)
+secrets.yml
+config.local.js
+config.local.json
+*.pem
+*.key
+
+# Generated media (review if these should be ignored or versioned)
+# src/classification/screenshots/*
+# src/classification/screenshots_specific/*
+# src/semrush_mailer/*.png
+# Add other output directories for images/videos if necessary
+
+# Local history files from IDEs
+.history/
+
+# Java files
+*.class
+*.log
+*.jar
+*.war
+*.ear
+
+# Gradle cache
+.gradle/
+build/
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+dependency-reduced-pom.xml
+
+# Scala build tool (sbt)
+project/project
+project/target
+target/
+
+# Output of Sphinx documentation
+docs/_build/
